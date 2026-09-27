@@ -27,7 +27,7 @@
                     <select name="guru_id" class="form-select" required>
                         <option value="">-- Pilih Guru --</option>
                         @foreach ($guru as $g)
-                            <option value="{{ $g->id }}" {{ (request('guru_id') == $g->id || (old('guru_id') == $g->id)) ? 'selected' : '' }}>
+                            <option value="{{ $g->id }}" {{ (request('guru_id', $currentGuru?->id ?? '') == $g->id || (old('guru_id') == $g->id)) ? 'selected' : '' }}>
                                 {{ $g->nama }} ({{ $g->nip ?? 'Guru' }})
                             </option>
                         @endforeach
@@ -51,7 +51,7 @@
                     <select name="kelas_id" class="form-select" required>
                         <option value="">-- Pilih Kelas --</option>
                         @foreach ($kelas as $k)
-                            <option value="{{ $k->id }}" {{ (request('kelas_id') == $k->id || (old('kelas_id') == $k->id)) ? 'selected' : '' }}>
+                            <option value="{{ $k->id }}" {{ (request('kelas_id', $selectedKelasId ?? '') == $k->id || (old('kelas_id') == $k->id)) ? 'selected' : '' }}>
                                 {{ $k->nama_kelas }}
                             </option>
                         @endforeach
@@ -89,9 +89,9 @@
     <div class="card-custom p-4">
         <form method="POST" action="{{ route('guru.absen.store') }}" id="absenForm">
             @csrf
-            <input type="hidden" name="guru_id" value="{{ request('guru_id') }}">
+            <input type="hidden" name="guru_id" value="{{ request('guru_id', $currentGuru?->id ?? '') }}">
             <input type="hidden" name="mapel_id" value="{{ request('mapel_id') }}">
-            <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}">
+            <input type="hidden" name="kelas_id" value="{{ request('kelas_id', $selectedKelasId ?? '') }}">
             <input type="hidden" name="tanggal" value="{{ request('tanggal', $tanggalDipilih) }}">
             <input type="hidden" name="jam_ke" value="{{ request('jam_ke') }}">
 
@@ -141,12 +141,31 @@
                     <tbody>
                         @foreach ($data_siswa as $idx => $siswa)
                         @php
-                            $currentStatus = $existing_status[$siswa->id] ?? 'Masuk';
+                            $sudahDiabsenSesiIni = isset($existing_status[$siswa->id]);
+                            $catatanSebelumnya = $catatan_harian[$siswa->id] ?? null;
+                            $isTelatPiket = isset($terlambat_today) && in_array($siswa->id, $terlambat_today);
+
+                            // Jika belum pernah diabsen di jam ini, tapi ada info Sakit/Izin hari ini dari sesi sebelumnya/sekretaris
+                            $currentStatus = $sudahDiabsenSesiIni 
+                                ? $existing_status[$siswa->id] 
+                                : ($catatanSebelumnya ?? 'Masuk');
                         @endphp
                         <tr>
                             <td class="text-center text-muted fw-semibold">{{ $idx + 1 }}</td>
                             <td><span class="badge bg-light text-dark border">{{ $siswa->nisn }}</span></td>
-                            <td class="fw-semibold">{{ $siswa->nama }}</td>
+                            <td class="fw-semibold">
+                                {{ $siswa->nama }}
+                                @if($isTelatPiket)
+                                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle ms-1" title="Tercatat terlambat di piket gerbang hari ini">
+                                        <i class="bi bi-clock-history me-1"></i>Telat Piket
+                                    </span>
+                                @endif
+                                @if($catatanSebelumnya && !$sudahDiabsenSesiIni)
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle ms-1" title="Tercatat {{ $catatanSebelumnya }} pada sesi sebelumnya hari ini">
+                                        <i class="bi bi-info-circle me-1"></i>Info: {{ $catatanSebelumnya }}
+                                    </span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 <span class="badge {{ $siswa->jenis_kelamin == 'L' ? 'bg-primary-subtle text-primary' : 'bg-danger-subtle text-danger' }}">
                                     {{ $siswa->jenis_kelamin }}

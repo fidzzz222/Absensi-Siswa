@@ -7,8 +7,10 @@ use App\Models\Siswa;
 use App\Models\Mapel;
 use App\Models\Kelas;
 use App\Models\Absensi;
+use App\Models\Pelanggaran;
 use App\Models\JamPelajaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class AbsensiController extends Controller
@@ -25,27 +27,56 @@ class AbsensiController extends Controller
 
         $data_siswa = [];
         $existing_status = [];
+        $catatan_harian = [];
+        $terlambat_today = [];
 
         $tanggalDipilih = $request->input('tanggal', Carbon::today()->toDateString());
 
-        if ($request->filled('kelas_id')) {
-            $data_siswa = Siswa::where('kelas_id', $request->kelas_id)
+        // Otomatis identifikasi guru jika user bertipe guru_mapel
+        $user = Auth::user();
+        $currentGuru = null;
+        if ($user && $user->role === 'guru_mapel') {
+            $currentGuru = Guru::where('nama', 'like', '%' . $user->name . '%')->first();
+        }
+
+        // Jika user adalah sekretaris dan belum ada kelas_id di query, default ke kelas 1
+        $selectedKelasId = $request->kelas_id;
+        if (!$selectedKelasId && $user && $user->role === 'sekretaris') {
+            $selectedKelasId = Kelas::first()?->id;
+        }
+
+        if ($selectedKelasId) {
+            $data_siswa = Siswa::where('kelas_id', $selectedKelasId)
                 ->orderBy('nama', 'asc')
                 ->get();
 
             // Cek apakah sudah pernah diabsen di jam & mapel & tanggal ini
             if ($request->filled('tanggal') && $request->filled('jam_ke') && $request->filled('mapel_id')) {
-                $existing_status = Absensi::where('kelas_id', $request->kelas_id)
+                $existing_status = Absensi::where('kelas_id', $selectedKelasId)
                     ->where('mapel_id', $request->mapel_id)
                     ->where('jam_ke', $request->jam_ke)
                     ->where('tanggal', $request->tanggal)
                     ->pluck('status', 'siswa_id')
                     ->toArray();
             }
+
+            // Estafet Sekretaris -> Guru Mapel: Catatan Sakit / Izin hari ini
+            $catatan_harian = Absensi::where('kelas_id', $selectedKelasId)
+                ->where('tanggal', $tanggalDipilih)
+                ->whereIn('status', ['Sakit', 'Izin'])
+                ->pluck('status', 'siswa_id')
+                ->toArray();
+
+            // Integrasi Piket: Siswa yang tercatat terlambat hari ini di gerbang
+            $terlambat_today = Pelanggaran::where('tanggal', $tanggalDipilih)
+                ->where('jenis', 'like', '%Terlambat%')
+                ->pluck('siswa_id')
+                ->toArray();
         }
 
         return view('dashboardd.absen', compact(
-            'kelas', 'mapel', 'guru', 'jam', 'data_siswa', 'existing_status', 'tanggalDipilih'
+            'kelas', 'mapel', 'guru', 'jam', 'data_siswa', 'existing_status', 
+            'tanggalDipilih', 'currentGuru', 'catatan_harian', 'terlambat_today', 'selectedKelasId'
         ));
     }
 
