@@ -6,41 +6,38 @@ Dokumen ini memuat analisis spesifikasi kebutuhan implementasi proyek yang terdi
 
 ---
 
-### A. Tabel Kebutuhan Alat, Bahan, dan Brainware
+### A. Tabel Kebutuhan Alat, Bahan, dan Brainware (Versi Ringkas)
 
-| Kategori | Komponen / Nama Alat | Spesifikasi / Fungsi / Keterangan |
+| Kategori | Alat / Bahan / SDM | Keterangan / Fungsi Inti |
 | :--- | :--- | :--- |
-| **Perangkat Keras (*Hardware*)** | **Laptop / Komputer PC Pengembang** | Processor Intel Core i5 / AMD Ryzen 5, RAM 8GB DDR4, Storage 256GB/512GB SSD. Digunakan sebagai workstation utama dalam penulisan kode sumber, kompilasi aset, dan pengujian lokal. |
-| | **Server Cloud VPS (Lingkungan Produksi)** | KVM VPS dengan RAM 4GB, 2 Core vCPU, 50GB NVMe SSD, Bandwidth Unlimited. Bertugas melayani *request concurrent* dari 36+ rombel kelas secara bersamaan pada jam sibuk. |
-| | **Perangkat Klien (PC / Laptop / Smartphone)** | Perangkat milik Guru, Siswa, Guru BK, dan Petugas Piket dengan layar responsif untuk mengakses web portal tanpa perlu instalasi aplikasi khusus. |
-| | **Perangkat Input (Mouse & Keyboard)** | Memudahkan navigasi kursor, akselerasi coding, serta input data administratif sekolah. |
-| | **Koneksi Jaringan Internet / Wi-Fi** | Akses internet minimal kecepatan 20 Mbps untuk pengunggahan aset, sinkronisasi repository Git, serta konektivitas database cloud secara realtime. |
-| **Perangkat Lunak (*Software*)** | **Sistem Operasi** | Windows 11 Pro 64-bit (Lingkungan Development) dan Linux Ubuntu Server 22.04 LTS (Lingkungan Server Production). |
-| | **Framework Web (Laravel 12.x)** | Framework PHP modern berbasis arsitektur MVC (*Model-View-Controller*) sebagai fondasi *business logic*, routing, validasi, dan autentikasi multi-role. |
-| | **Bahasa Pemrograman (PHP 8.3+)** | Bahasa pemrograman *server-side* utama yang menjalankan logika aplikasi dan pemrosesan data presensi. |
-| | **Local Server Environment (XAMPP / Apache)** | Paket server web lokal Apache dan MySQL untuk tahap *development* dan *local testing*. |
-| | **Database Management System (MySQL / MariaDB)** | Sistem manajemen basis data relasional untuk menyimpan tabel pengguna, siswa, guru, kelas, mapel, absensi, dan pelanggaran. |
-| | **Database GUI Tool (phpMyAdmin / DBeaver)** | Antarmuka grafis untuk pemantauan struktur tabel, import data awal, dan optimasi query indeks basis data. |
-| | **Frontend Styling & UI (Bootstrap 5.3 & Icons)** | Framework CSS responsif, Bootstrap Icons 1.11, dan font Google (*Plus Jakarta Sans*) untuk antarmuka pengguna yang bersih dan berstandar tinggi. |
-| | **Asset Bundler & JS Tooling (Vite 7 & Node.js)** | Mengelola dependensi frontend dan melakukan kompilasi otomatis aset CSS/JavaScript secara instan. |
-| | **Dependency Manager (Composer & NPM)** | Composer untuk pustaka dependensi PHP/Laravel, dan NPM untuk pustaka modul JavaScript. |
-| | **Source Code Editor (Visual Studio Code)** | Editor teks utama yang dilengkapi ekstensi *PHP Intelephense*, *Laravel Artisan*, dan *Tailwind/Bootstrap IntelliSense*. |
-| | **Web Browser Modern (Chrome / Edge / Firefox)** | Peramban web untuk pratinjau antarmuka, *DevTools inspect element*, dan simulasi tampilan mobile/desktop. |
-| | **Version Control System (Git & GitHub)** | Pelacak riwayat revisi kode, pencabangan (*branching*), kolaborasi pengembang, serta *cloud repository backup*. |
-| | **Automated Testing Suite (PHPUnit 11)** | Pengujian otomatis (*Unit & Feature Test*) untuk memastikan validitas alur multi-role dan integritas data presensi. |
-| **Bahan (*Data & Aset Digital*)** | **Data Master Siswa** | Dokumen data profil seluruh siswa aktif (NISN, Nama Lengkap, Jenis Kelamin, ID Kelas/Rombel). |
-| | **Data Master Tenaga Pendidik (Guru)** | Dokumen data profil guru pengajar (NIP, Nama Lengkap, Kontak, Mata Pelajaran yang diampu). |
-| | **Data Kurikulum Mata Pelajaran** | Daftar kode mata pelajaran, nama mapel, dan jenjang tingkatan kelas di SMKN 1 Kota Bekasi. |
-| | **Data Jam & Jadwal Pelajaran** | Alokasi pembagian jam pelajaran ke-1 sampai ke-10 serta matriks jadwal mengajar harian. |
-| | **Aset Logo & Identitas Sekolah** | File grafis Logo SMKN 1 Kota Bekasi format PNG resolusi tinggi transparan (rasio 1:1) dan favicon aplikasi. |
-| | **Regulasi & Matriks Pelanggaran Kedisiplinan** | Daftar kategori tata tertib siswa, bobot skor/poin pelanggaran, dan klasifikasi tindakan pembinaan dari tim BK. |
-| **Perangkat Pikir (*Brainware*)** | **Fullstack Web Developer** | Tenaga ahli yang merancang struktur basis data, menulis kode backend/frontend, menghubungkan integrasi antar peran, dan memastikan sistem bebas dari celah keamanan maupun *bug*. |
-| | **System Administrator / IT Support Sekolah** | Bertanggung jawab terhadap konfigurasi domain `.sch.id`, instalasi SSL certificate, pemeliharaan server VPS, dan otomasi jadwal *cloud backup*. |
-| | **Guru Mata Pelajaran (*End-User*)** | Pengguna yang melakukan presensi berkala di setiap jam pelajaran berlangsung, memantau kehadiran kelas, dan melihat riwayat absensi mapel. |
-| | **Guru Piket (*End-User*)** | Petugas yang mencatat keterlambatan siswa di gerbang pagi hari, memantau rekapan kehadiran seluruh rombel, dan menangani izin keluar-masuk sekolah. |
-| | **Guru Bimbingan Konseling / BK (*End-User*)** | Pengguna yang mengidentifikasi siswa dengan riwayat alpa/bolos tinggi, mencatat rekam jejak pelanggaran kedisiplinan, serta mengelola poin pembinaan. |
-| | **Sekretaris Kelas (*End-User*)** | Siswa perwakilan kelas yang membantu guru mencatat draf awal kehadiran rekan sekelasnya pada jam pertama. |
-| | **Siswa (*End-User*)** | Pengguna mandiri yang mengakses portal pribadi untuk melihat persentase kehadiran, riwayat ketidakhadiran per mapel, serta catatan kedisiplinan pribadi. |
+| **Perangkat Keras (*Hardware*)** | **Laptop / PC** | Perangkat utama pengembangan aplikasi |
+| | **Server Cloud VPS** | Hosting server produksi (RAM 4GB) |
+| | **Perangkat Klien** | Akses web portal bagi pengguna (HP/Laptop) |
+| | **Mouse & Keyboard** | Perangkat input navigasi dan pengetikan |
+| | **Koneksi Internet** | Akses jaringan, sinkronisasi, dan deploy |
+| **Perangkat Lunak (*Software*)** | **Sistem Operasi** | Windows (Development) & Linux (Server) |
+| | **Laravel 12** | Framework backend utama (arsitektur MVC) |
+| | **PHP 8.3** | Bahasa pemrograman server-side |
+| | **XAMPP / Apache** | Web server lokal dan database testing |
+| | **MySQL / phpMyAdmin** | Basis data relasional dan alat pengelola |
+| | **Bootstrap 5.3 & Icons** | Styling antarmuka responsif dan ikon |
+| | **Vite & Node.js** | Bundling aset CSS dan JavaScript |
+| | **Composer & NPM** | Pengelola paket dependensi proyek |
+| | **Visual Studio Code** | Code editor penulisan program |
+| | **Web Browser** | Pengujian tampilan dan alur aplikasi |
+| | **Git & GitHub** | Version control dan penyimpanan repositori |
+| | **PHPUnit** | Pengujian otomatis (Feature & Unit Test) |
+| **Bahan (*Data & Aset*)** | **Data Siswa & Guru** | Data master identitas pengguna presensi |
+| | **Data Mapel & Jadwal** | Data master alokasi jam mengajar |
+| | **Logo SMKN 1 Kota Bekasi** | Aset visual dan identitas antarmuka |
+| | **Aturan Tata Tertib** | Acuan kategori dan poin pelanggaran BK |
+| **Perangkat Pikir (*Brainware*)** | **Fullstack Developer** | Perancang dan pembuat sistem aplikasi |
+| | **Administrator IT** | Pengelola server, domain, dan backup data |
+| | **Guru Mapel** | Penginput presensi per jam pelajaran |
+| | **Guru Piket** | Pencatat keterlambatan gerbang sekolah |
+| | **Guru BK** | Pemantau absensi & pengelola poin pelanggaran |
+| | **Sekretaris Kelas** | Pembantu pencatat draf presensi kelas |
+| | **Siswa** | Pemantau rekap presensi dan poin pribadi |
 
 ---
 
