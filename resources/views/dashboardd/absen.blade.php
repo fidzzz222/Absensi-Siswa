@@ -146,8 +146,8 @@
                             $isTelatPiket = isset($terlambat_today) && in_array($siswa->id, $terlambat_today);
 
                             // Jika belum pernah diabsen di jam ini, tapi ada info Sakit/Izin hari ini dari sesi sebelumnya/sekretaris
-                            $currentStatus = $sudahDiabsenSesiIni 
-                                ? $existing_status[$siswa->id] 
+                            $currentStatus = $sudahDiabsenSesiIni
+                                ? $existing_status[$siswa->id]
                                 : ($catatanSebelumnya ?? 'Masuk');
                         @endphp
                         <tr>

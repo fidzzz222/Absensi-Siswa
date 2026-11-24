@@ -75,7 +75,7 @@ class AbsensiController extends Controller
         }
 
         return view('dashboardd.absen', compact(
-            'kelas', 'mapel', 'guru', 'jam', 'data_siswa', 'existing_status', 
+            'kelas', 'mapel', 'guru', 'jam', 'data_siswa', 'existing_status',
             'tanggalDipilih', 'currentGuru', 'catatan_harian', 'terlambat_today', 'selectedKelasId'
         ));
     }
